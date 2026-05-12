@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🇫🇷 나에게 잘 맞는 프랑스 도시는 어디일까?</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #faf6f0;
+    --ink: #1a1410;
+    --accent: #c8602a;
+    --gold: #d4a843;
+    --muted: #8a7968;
+    --card: #ffffff;
+    --border: #e8e0d4;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* 배경 텍스처 */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(200,96,42,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(212,168,67,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  /* ── 인트로 ── */
+  #screen-intro {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  .flag {
+    font-size: 56px;
+    margin-bottom: 16px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .intro-subtitle {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 20px;
+  }
+
+  .intro-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: clamp(28px, 6vw, 42px);
+    line-height: 1.25;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+
+  .intro-title span { color: var(--accent); }
+
+  .intro-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 420px;
+    margin: 0 auto 36px;
+  }
+
+  .divider {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 20px auto;
+  }
+
+  .btn-start {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 16px 44px;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .btn-start::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1px solid rgba(255,255,255,0.15);
+    pointer-events: none;
+  }
+
+  .btn-start:hover {
+    background: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(200,96,42,0.25);
+  }
+
+  /* ── 퀴즈 ── */
+  #screen-quiz {
+    display: none;
+    padding: 40px 0 80px;
+  }
+
+  .progress-bar-wrap {
+    position: sticky;
+    top: 0;
+    background: var(--cream);
+    padding: 16px 0 12px;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px;
+    margin-bottom: 8px;
+  }
+
+  .progress-label {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .progress-count {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    color: var(--accent);
+  }
+
+  .progress-track {
+    height: 2px;
+    background: var(--border);
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .progress-fill {
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 36px 32px;
+    margin-bottom: 16px;
+    animation: slideIn 0.35s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    letter-spacing: 0.06em;
+  }
+
+  .q-text {
+    font-size: clamp(16px, 3.5vw, 20px);
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .q-sub {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  .option-btn:hover {
+    border-color: var(--accent);
+    background: #fff8f4;
+    transform: translateX(4px);
+  }
+
+  .option-btn.selected {
+    border-color: var(--accent);
+    background: #fff3ec;
+  }
+
+  .option-emoji {
+    font-size: 22px;
+    flex-shrink: 0;
+    width: 32px;
+    text-align: center;
+  }
+
+  .option-text { flex: 1; }
+  .option-main { font-weight: 500; font-size: 14px; }
+  .option-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .nav-btns {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    margin-top: 24px;
+  }
+
+  .btn-prev {
+    padding: 12px 24px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-prev:hover { border-color: var(--ink); color: var(--ink); }
+
+  .btn-next {
+    padding: 12px 32px;
+    border: none;
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: auto;
+  }
+
+  .btn-next:hover { background: var(--accent); }
+  .btn-next:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+  /* ── 결과 ── */
+  #screen-result {
+    display: none;
+    padding: 60px 0 80px;
+    text-align: center;
+  }
+
+  .result-eyebrow {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    letter-spacing: 0.06em;
+  }
+
+  .result-city {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: clamp(40px, 10vw, 68px);
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+
+  .result-city span { color: var(--accent); }
+
+  .result-type {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .result-emoji-row {
+    font-size: 36px;
+    margin-bottom: 24px;
+    letter-spacing: 8px;
+  }
+
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 32px;
+    text-align: left;
+    margin-bottom: 16px;
+  }
+
+  .result-desc {
+    font-size: 15px;
+    line-height: 1.9;
+    color: var(--ink);
+    margin-bottom: 20px;
+  }
+
+  .result-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .tag {
+    font-size: 12px;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    letter-spacing: 0.03em;
+  }
+
+  .result-landmarks {
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+  }
+
+  .landmarks-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .landmark-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .landmark-item {
+    font-size: 13px;
+    color: var(--ink);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .landmark-item::before {
+    content: '→';
+    color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .btn-retry {
+    margin-top: 32px;
+    display: inline-block;
+    padding: 14px 40px;
+    border: 1.5px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-retry:hover {
+    background: var(--ink);
+    color: var(--cream);
+  }
+
+  .corner-deco {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-color: var(--gold);
+    border-style: solid;
+    opacity: 0.4;
+  }
+  .corner-tl { top: 12px; left: 12px; border-width: 2px 0 0 2px; }
+  .corner-tr { top: 12px; right: 12px; border-width: 2px 2px 0 0; }
+  .corner-bl { bottom: 12px; left: 12px; border-width: 0 0 2px 2px; }
+  .corner-br { bottom: 12px; right: 12px; border-width: 0 2px 2px 0; }
+
+  .result-hero {
+    position: relative;
+    padding: 40px 20px 32px;
+  }
+</style>
+</head>
+<body>
+
+<!-- 인트로 -->
+<div id="screen-intro">
+  <div class="flag">🇫🇷</div>
+  <p class="intro-subtitle">Quel voyageur êtes-vous ?</p>
+  <h1 class="intro-title">나에게 잘 맞는<br><span>프랑스 도시</span>는 어디일까?</h1>
+  <div class="divider"></div>
+  <p class="intro-desc">
+    파리? 니스? 아니면 전혀 예상치 못한 그 도시?<br>
+    9개 질문으로 알아보는 나의 프랑스 여행 유형 🧳
+  </p>
+  <button class="btn-start" onclick="startQuiz()">테스트 시작하기</button>
+</div>
+
+<!-- 퀴즈 -->
+<div id="screen-quiz">
+  <div class="progress-bar-wrap">
+    <div class="progress-info">
+      <span class="progress-label">QUESTION</span>
+      <span class="progress-count" id="progress-count">1 / 9</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+  <div class="wrap">
+    <div id="question-area"></div>
+    <div class="nav-btns">
+      <button class="btn-prev" id="btn-prev" onclick="prevQ()">← 이전</button>
+      <button class="btn-next" id="btn-next" onclick="nextQ()" disabled>다음 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- 결과 -->
+<div id="screen-result">
+  <div class="wrap">
+    <div class="result-hero">
+      <div class="corner-deco corner-tl"></div>
+      <div class="corner-deco corner-tr"></div>
+      <div class="corner-deco corner-bl"></div>
+      <div class="corner-deco corner-br"></div>
+      <p class="result-eyebrow">당신의 프랑스 도시는...</p>
+      <div class="result-city" id="result-city"></div>
+      <div class="result-type" id="result-type"></div>
+      <div class="result-emoji-row" id="result-emoji"></div>
+    </div>
+    <div class="result-card">
+      <p class="result-desc" id="result-desc"></p>
+      <div class="result-tags" id="result-tags"></div>
+      <div class="result-landmarks">
+        <p class="landmarks-label">꼭 가봐야 할 곳</p>
+        <div class="landmark-list" id="result-landmarks"></div>
+      </div>
+    </div>
+    <button class="btn-retry" onclick="resetQuiz()">🔄 다시 하기</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "여행 경비는 어떻게 쓰는 편인가요?",
+    sub: "평소 여행 스타일을 떠올리며 골라보세요 😊",
+    options: [
+      { emoji: "💸", main: "가성비 여행이 최고", desc: "알뜰하게 다니는 게 오히려 재미있어요" },
+      { emoji: "🤔", main: "상황에 따라 다름", desc: "아낄 건 아끼고, 의미 있는 곳엔 기꺼이 써요" },
+      { emoji: "💳", main: "여행할 때는 아끼지 않음", desc: "좋은 숙소, 맛있는 식당 — 경험에 투자하는 편이에요" },
+    ],
+    scores: {
+      가성비: { Carcassonne: 3, Marseille: 3, Lyon: 1 },
+      중간: { Lyon: 2, Strasbourg: 2, Nice: 1 },
+      럭셔리: { Paris: 3, Bordeaux: 3, Nice: 2 },
+    },
+    keys: ["가성비", "중간", "럭셔리"]
+  },
+  {
+    q: "여행지를 고를 때, 어떤 환경이 더 끌리나요?",
+    sub: "직관적으로 골라보세요!",
+    options: [
+      { emoji: "🌿", main: "자연 속이 좋음", desc: "바다, 해변가, 호수, 숲... 탁 트인 곳에서 숨이 트여요" },
+      { emoji: "🏙️", main: "도시 구석구석이 좋음", desc: "골목, 카페, 사람 사는 냄새가 나는 도시가 좋아요" },
+    ],
+    scores: {
+      자연: { Carcassonne: 3, Nice: 2, Strasbourg: 1 },
+      도시: { Paris: 3, Lyon: 2, Bordeaux: 2, Marseille: 2, Strasbourg: 1 },
+    },
+    keys: ["자연", "도시"]
+  },
+  {
+    q: "여행하기 가장 좋은 계절은 언제인가요?",
+    sub: "이상적인 여행 날씨를 골라보세요",
+    options: [
+      { emoji: "☀️", main: "당연히 여름!", desc: "해변, 노천카페, 반팔 입고 돌아다니는 그 느낌이 좋아요" },
+      { emoji: "❄️", main: "겨울 감성이 최고", desc: "크리스마스 조명, 따뜻한 뱅쇼, 코트 입고 야경 보는 게 낭만이에요" },
+    ],
+    scores: {
+      여름: { Nice: 3, Marseille: 2, Carcassonne: 2, Paris: 1 },
+      겨울: { Strasbourg: 3, Paris: 2, Bordeaux: 1, Lyon: 1 },
+    },
+    keys: ["여름", "겨울"]
+  },
+  {
+    q: "여행 사진 폴더를 열면 어떤 사진이 가장 많은가요?",
+    sub: "평소 갤러리를 떠올리며 골라보세요",
+    options: [
+      { emoji: "🏛️", main: "건물·골목 사진 가득", desc: "웅장한 건물, 아기자기한 골목에 자꾸 눈이 가요" },
+      { emoji: "🍽️", main: "음식 사진 가득", desc: "먹기 전에 사진 찍는 건 기본이에요" },
+      { emoji: "🌅", main: "풍경·자연 사진 가득", desc: "하늘, 바다, 노을... 분위기 있는 풍경 사진을 좋아해요" },
+    ],
+    scores: {
+      건축: { Strasbourg: 3, Paris: 2, Carcassonne: 2, Bordeaux: 1 },
+      음식: { Lyon: 3, Marseille: 2, Bordeaux: 1 },
+      풍경: { Nice: 3, Carcassonne: 2, Strasbourg: 1 },
+    },
+    keys: ["건축", "음식", "풍경"]
+  },
+  {
+    q: "여행지에서 어느 쪽 동네가 더 끌리나요?",
+    sub: "솔직하게 골라보세요!",
+    options: [
+      { emoji: "📸", main: "관광객이 많은 유명한 곳", desc: "많은 사람들이 찾는 데는 그만한 이유가 있으니까요" },
+      { emoji: "🗺️", main: "현지인들이 사는 동네", desc: "가이드북에 없는 골목에서 진짜 그 도시를 느끼고 싶어요" },
+    ],
+    scores: {
+      관광지: { Paris: 3, Nice: 3, Bordeaux: 1 },
+      현지인: { Lyon: 3, Marseille: 3, Carcassonne: 2, Strasbourg: 2 },
+    },
+    keys: ["관광지", "현지인"]
+  },
+  {
+    q: "역사나 문화에 관심이 있는 편인가요?",
+    sub: "박물관 앞에 섰을 때를 상상해보세요",
+    options: [
+      { emoji: "🏛️", main: "네, 관심 있어요!", desc: "역사를 알고 보면 훨씬 더 재미있더라고요. 오디오 가이드도 챙겨요" },
+      { emoji: "😅", main: "솔직히 별로 없어요", desc: "예쁘고 멋지면 충분해요. 언제 지어진지까지는 잘 몰라도 괜찮아요" },
+    ],
+    scores: {
+      관심있음: { Carcassonne: 3, Strasbourg: 3, Bordeaux: 2, Lyon: 1, Paris: 1 },
+      관심없음: { Nice: 2, Marseille: 1, Paris: 1 },
+    },
+    keys: ["관심있음", "관심없음"]
+  },
+  {
+    q: "여행지에서 밤 시간을 어떻게 보내고 싶으세요?",
+    sub: "이상적인 여행 밤을 골라보세요",
+    options: [
+      { emoji: "🌃", main: "야경 보러 가기", desc: "조명이 켜진 도시나 성당을 바라보며 하루를 마무리해요" },
+      { emoji: "🎉", main: "축제·페스티벌에 참여하기", desc: "현지 축제에서 현지인들과 어울리는 것도 여행의 묘미예요" },
+      { emoji: "🛁", main: "숙소에서 편하게 쉬기", desc: "낮에 열심히 다녔으니, 밤엔 푹 쉬는 게 맞죠" },
+    ],
+    scores: {
+      야경: { Paris: 2, Strasbourg: 2, Bordeaux: 1, Carcassonne: 1 },
+      바클럽: { Nice: 3, Marseille: 2 },
+      쉼: { Lyon: 3, Carcassonne: 2, Bordeaux: 2 },
+    },
+    keys: ["야경", "바클럽", "쉼"]
+  },
+  {
+    q: "여행 페이스는 어떤 편인가요?",
+    sub: "평소 여행 스타일을 떠올려보세요",
+    options: [
+      { emoji: "🏃", main: "빠르게, 많이 즐기기", desc: "가고 싶은 곳 리스트를 다 채워야 뿌듯해요" },
+      { emoji: "🧘", main: "천천히, 깊게 보기", desc: "카페 한 곳에서 두 시간도 괜찮아요. 여유롭게 즐기는 게 여행이죠" },
+    ],
+    scores: {
+      빠르게: { Paris: 3, Nice: 2, Marseille: 1 },
+      천천히: { Lyon: 3, Bordeaux: 3, Carcassonne: 2, Strasbourg: 2 },
+    },
+    keys: ["빠르게", "천천히"]
+  },
+  {
+    q: "여행에서 가장 중요한 것은 무엇인가요?",
+    sub: "딱 하나만 골라보세요!",
+    options: [
+      { emoji: "🍷", main: "분위기와 감성", desc: "그 도시의 공기, 빛, 향기. 인스타 감성이 아닌 진짜 감성을 느끼고 싶어요" },
+      { emoji: "🍽️", main: "음식과 맛", desc: "그 도시의 음식을 맛보는 것 자체가 여행의 목적이에요" },
+      { emoji: "🏛️", main: "역사와 볼거리", desc: "발품을 팔아 직접 보고 나면, 그게 가장 오래 기억에 남아요" },
+    ],
+    scores: {
+      감성: { Bordeaux: 3, Strasbourg: 2, Nice: 1 },
+      음식: { Lyon: 3, Marseille: 2, Bordeaux: 1 },
+      역사: { Carcassonne: 3, Paris: 2, Strasbourg: 1 },
+    },
+    keys: ["감성", "음식", "역사"]
+  },
+];
+
+const cities = {
+  Paris: {
+    name: "Paris",
+    type: "문화예술 올라운더",
+    emoji: "🗼🎨🥐",
+    desc: "파리는 예술, 패션, 미식이 한 도시에 모두 담긴 곳이에요. 세계에서 가장 많은 관광객이 찾는 도시인 만큼, 볼거리와 즐길 거리가 넘쳐나요. 좋은 것은 다 경험해보고 싶고, 문화적인 것에 관심이 많은 당신께 딱 어울리는 도시랍니다. 에펠탑, 루브르, 오르세 미술관까지 — 하루하루가 알차게 채워질 거예요!",
+    tags: ["#문화예술", "#패션", "#미식", "#야경", "#관광지", "#럭셔리"],
+    landmarks: [
+      "에펠탑 — 처음엔 흉물 취급을 받았지만, 지금은 프랑스의 상징이에요",
+      "루브르 박물관 — 모나리자가 있는 곳, 원래는 왕궁이었답니다",
+      "개선문 — 나폴레옹이 전쟁 승리를 기념해 세운 아치형 문이에요",
+    ]
+  },
+  Lyon: {
+    name: "Lyon",
+    type: "미식 여유파",
+    emoji: "🍽️🫕☕",
+    desc: "리옹은 프랑스 미식의 수도로 불릴 만큼 음식 문화가 발달한 도시예요. 빠르게 많이 보는 여행보다 한 곳에서 천천히 머물며 즐기는 것을 좋아하는 당신께 잘 맞아요. 선선한 저녁 즈음 미슐랭 레스토랑에서 부숑 요리를 즐기고, 강변을 따라 여유롭게 산책하는 코스를 추천드려요! 인기 레스토랑은 미리 예약하는 것, 잊지 마세요.",
+    tags: ["#미식", "#현지인감성", "#여유", "#부숑", "#미슐랭", "#강변산책"],
+    landmarks: [
+      "론·손 강 둑길 — 리옹 시민들의 일상 산책 코스예요",
+      "부숑 (Bouchon) — 리옹 전통 식당으로, 내장 요리가 명물이에요",
+      "비유크리옹 — 구시가지 전체가 UNESCO 세계유산으로 지정되어 있어요",
+    ]
+  },
+  Nice: {
+    name: "Nice",
+    type: "지중해 자유영혼",
+    emoji: "🌊☀️🎉",
+    desc: "니스는 지중해 연안의 따뜻한 햇살과 쪽빛 바다가 유명한 휴양 도시예요. 해변에서 여유롭게 쉬고, 활기찬 축제 분위기를 즐기는 것을 좋아하는 당신께 잘 맞아요. 매년 2월에 열리는 니스 카니발은 세계 3대 카니발 중 하나로, 꼭 한번 경험해볼 만한 축제랍니다. 참고로 니스 해변은 모래가 아닌 자갈이니, 편하게 일광욕을 즐기려면 돗자리를 꼭 챙겨가세요!",
+    tags: ["#해변", "#축제", "#카니발", "#지중해", "#자유", "#휴양"],
+    landmarks: [
+      "Promenade des Anglais — 19세기 영국 귀족들이 만든 해변 산책로예요",
+      "니스 카니발 — 매년 2월, 세계 3대 카니발 중 하나랍니다",
+      "쪽빛 바다 — 코트다쥐르의 에메랄드빛 지중해가 펼쳐져요",
+    ]
+  },
+  Strasbourg: {
+    name: "Strasbourg",
+    type: "동화감성 역덕후",
+    emoji: "🎄🏛️🏘️",
+    desc: "스트라스부르는 골목 사진을 찍으며 시간을 보내는 걸 좋아하는 당신께 꼭 맞는 도시예요. 지도보다 발길이 이끄는 대로 걷다 보면 예상치 못한 아름다운 풍경을 만나게 된답니다. 프랑스 도시이지만 독일 문화가 자연스럽게 섞여 있어 독특한 분위기를 자아내는 곳이에요. 유럽에서 가장 오래된 크리스마스 마켓도 열리니, 사진 꼭 건지고 오세요!",
+    tags: ["#동화감성", "#크리스마스마켓", "#역사", "#골목여행", "#UNESCO", "#알자스"],
+    landmarks: [
+      "노트르담 대성당 — 완공까지 400년이 걸렸고, 한때 세계에서 가장 높은 건물이었어요",
+      "Petite France — 운하를 따라 늘어선 중세 목조건물 동네예요",
+      "Marché de Noël — 유럽에서 가장 오래된 크리스마스 마켓이에요",
+    ]
+  },
+  Bordeaux: {
+    name: "Bordeaux",
+    type: "우아한 감성파",
+    emoji: "🍷✨🌹",
+    desc: "보르도는 세계적으로 유명한 와인 산지이자, 고풍스러운 역사 도시예요. 트렌디한 것보다 클래식한 것, 시끌벅적한 것보다 조용하고 품격 있는 분위기를 좋아하는 당신께 잘 맞아요. 가론 강변에서 노을을 바라보며 와인 한 잔을 즐기는 것, 생각만 해도 설레지 않나요? 최근에는 젊고 감각적인 도시로도 변모하고 있어 볼거리가 더욱 풍성해졌어요.",
+    tags: ["#와인", "#감성", "#우아함", "#가론강", "#UNESCO", "#럭셔리"],
+    landmarks: [
+      "물의 거울 광장 — 유럽 최대 규모의 반사 수면으로, 석양 명소예요",
+      "Cité du Vin — 와인 디캔터 모양으로 설계된 와인 전문 박물관이에요",
+      "생테밀리옹 — 세계 최고급 와인 생산지로, 차로 약 40분 거리예요",
+    ]
+  },
+  Carcassonne: {
+    name: "Carcassonne",
+    type: "중세 판타지 여행자",
+    emoji: "🏰⚔️🌿",
+    desc: "카르카손은 유럽에서 가장 잘 보존된 중세 성채 도시로, 마치 동화 속에 들어온 것 같은 느낌을 주는 곳이에요. 관광객이 많은 유명한 곳보다 역사 깊고 조용한 곳을 선호하는 당신께 딱 맞는 도시랍니다. 한국에서는 아직 많이 알려지지 않은 곳이지만, 직접 가보면 그 매력에 빠지게 될 거예요. 성벽 위를 걸으며 중세 시대를 상상해보는 특별한 경험을 해보세요!",
+    tags: ["#중세성채", "#역사", "#자연", "#가성비", "#숨은명소", "#UNESCO"],
+    landmarks: [
+      "중세 성채 — 기원전 3세기부터 쌓아 올린 이중 성벽으로, 유럽 최대 규모예요",
+      "Canal du Midi — 대서양과 지중해를 잇는 운하로, UNESCO 세계유산이에요",
+      "Cavayère 호수 — 도심에서 5분 거리에 있는 아름다운 인공 호수예요",
+    ]
+  },
+  Marseille: {
+    name: "Marseille",
+    type: "찐현지 탐험가",
+    emoji: "⚓🌊🧭",
+    desc: "마르세유는 가이드북보다 직접 발로 뛰며 도시를 탐험하는 걸 즐기는 당신께 잘 맞는 도시예요. 프랑스 제2의 도시이지만 관광지화가 덜 되어 있어 진짜 현지 분위기가 살아있답니다. 이민자 문화가 뒤섞인 파니에 지구 골목, 매일 아침 열리는 구항구의 생선 시장... 관광객이 아니라 잠시 이 도시에 사는 사람처럼 여행해보고 싶은 당신께 딱이에요. 참고로 마르세유 사람들은 목소리가 크고 활기찬 편이니 미리 알고 가세요!",
+    tags: ["#현지인", "#항구도시", "#부이야베스", "#이민자문화", "#가성비", "#진짜여행"],
+    landmarks: [
+      "Vieux-Port — 2,600년 역사의 구항구로, 매일 아침 생선 시장이 열려요",
+      "Panier 지구 — 좁은 골목에 그라피티 예술과 이민 문화가 공존하는 동네예요",
+      "Notre-Dame de la Garde — 도시에서 가장 높은 언덕 위의 성당으로, 마르세유 전경이 한눈에 보여요",
+    ]
+  },
+};
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+
+function startQuiz() {
+  document.getElementById('screen-intro').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  renderQ();
+}
+
+function renderQ() {
+  const q = questions[current];
+  const prev = document.getElementById('question-area');
+
+  document.getElementById('progress-count').textContent = `${current + 1} / ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${((current + 1) / questions.length) * 100}%`;
+  document.getElementById('btn-prev').style.visibility = current === 0 ? 'hidden' : 'visible';
+
+  const isLast = current === questions.length - 1;
+  const nextBtn = document.getElementById('btn-next');
+  nextBtn.textContent = isLast ? '결과 보기 ✨' : '다음 →';
+  nextBtn.disabled = answers[current] === null;
+
+  const html = `
+    <div class="question-card">
+      <p class="q-number">Question ${current + 1}</p>
+      <p class="q-text">${q.q}</p>
+      <p class="q-sub">${q.sub}</p>
+      <div class="options">
+        ${q.options.map((opt, i) => `
+          <button class="option-btn ${answers[current] === i ? 'selected' : ''}" onclick="selectOpt(${i})">
+            <span class="option-emoji">${opt.emoji}</span>
+            <span class="option-text">
+              <span class="option-main">${opt.main}</span>
+              <span class="option-desc">${opt.desc}</span>
+            </span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  prev.innerHTML = html;
+}
+
+function selectOpt(i) {
+  answers[current] = i;
+  document.querySelectorAll('.option-btn').forEach((b, idx) => {
+    b.classList.toggle('selected', idx === i);
+  });
+  document.getElementById('btn-next').disabled = false;
+}
+
+function nextQ() {
+  if (answers[current] === null) return;
+  if (current < questions.length - 1) {
+    current++;
+    renderQ();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    showResult();
+  }
+}
+
+function prevQ() {
+  if (current > 0) {
+    current--;
+    renderQ();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function showResult() {
+  const scores = {};
+  Object.keys(cities).forEach(c => scores[c] = 0);
+
+  answers.forEach((ans, qi) => {
+    if (ans === null) return;
+    const q = questions[qi];
+    const key = q.keys[ans];
+    const cityScores = q.scores[key];
+    if (cityScores) {
+      Object.entries(cityScores).forEach(([city, score]) => {
+        scores[city] = (scores[city] || 0) + score;
+      });
+    }
+  });
+
+  const winner = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+  const city = cities[winner];
+
+  document.getElementById('screen-quiz').style.display = 'none';
+  document.getElementById('screen-result').style.display = 'block';
+
+  document.getElementById('result-city').innerHTML = city.name;
+  document.getElementById('result-type').textContent = city.type;
+  document.getElementById('result-emoji').textContent = city.emoji;
+  document.getElementById('result-desc').textContent = city.desc;
+  document.getElementById('result-tags').innerHTML = city.tags.map(t => `<span class="tag">${t}</span>`).join('');
+  document.getElementById('result-landmarks').innerHTML = city.landmarks.map(l => `<div class="landmark-item">${l}</div>`).join('');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetQuiz() {
+  current = 0;
+  answers = new Array(questions.length).fill(null);
+  document.getElementById('screen-result').style.display = 'none';
+  document.getElementById('screen-intro').style.display = 'flex';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
